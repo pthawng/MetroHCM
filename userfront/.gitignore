@@ -1,0 +1,50 @@
+# [ USERFRONT ] NEXT.JS PROJECT GITIGNORE
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Build Artifacts
+/.next/
+/out/
+/build
+/dist
+
+# TS / Cache
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# Environment / Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+*.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing / Reports
+/coverage
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+
+# Vercel / Deployment
+.vercel
+
+# Modern Web Tooling
+.turbo
+.next-boost-cache
+.svgrrc
+
+# Next.js specific
+next-env.d.ts
