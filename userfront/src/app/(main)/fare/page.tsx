@@ -1,34 +1,26 @@
-import React from 'react';
-import { FareCalculator } from '@/components/features/fare/FareCalculator';
 import { FareMatrixTable } from '@/components/features/fare/FareMatrixTable';
 import { Train, Info, CreditCard, Ticket } from 'lucide-react';
 
 export const metadata = {
   title: 'Giá vé Metro Số 1 - MetroHCM Command Center',
-  description: 'Tra cứu giá vé chính thức tuyến Metro Bến Thành - Suối Tiên. Cập nhật tháng 12/2024.',
+  description: 'Bảng giá vé chính thức tuyến Metro Bến Thành - Suối Tiên. Cập nhật tháng 12/2024.',
 };
 
 export default function FarePage() {
   return (
-    <main className="min-h-screen py-24 px-6 md:px-12 max-w-7xl mx-auto space-y-24">
+    <main className="min-h-screen py-24 px-6 md:px-12 max-w-7xl mx-auto space-y-32">
       {/* Hero Section */}
       <section className="text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-bold tracking-widest uppercase mb-4 animate-pulse">
           <Train size={16} /> Official Fare System
         </div>
-        <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white">
+        <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white uppercase italic">
           BIỂU GIÁ VÉ <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">METRO SỐ 1</span>
         </h1>
         <p className="max-w-2xl mx-auto text-lg text-white/40 font-medium">
-          Hệ thống tra cứu giá vé tự động dựa trên Quyết định số 5327/QĐ-UBND ngày 21/11/2024. 
-          Đảm bảo tính minh bạch và chính xác cho mọi lộ trình.
+          Thông tin chi tiết các loại vé và bảng giá niêm yết theo Quyết định số 5327/QĐ-UBND ngày 21/11/2024. 
+          Đảm bảo tính cung cấp dữ liệu chính xác cho người dân.
         </p>
-      </section>
-
-      {/* Interactive Calculator */}
-      <section className="relative">
-         <div className="absolute inset-0 bg-cyan-500/5 blur-[120px] rounded-full -z-10" />
-         <FareCalculator />
       </section>
 
       {/* Fare Policy Grid */}
@@ -76,11 +68,6 @@ export default function FarePage() {
         </div>
         <FareMatrixTable />
       </section>
-
-      {/* Footer Info */}
-      <footer className="pt-24 pb-12 text-center text-white/20 text-xs uppercase tracking-widest border-t border-white/5">
-        &copy; 2024 MetroHCM Digital Twin &bull; Department of Urban Railways HCMC
-      </footer>
     </main>
   );
 }

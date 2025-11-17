@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 import { PageTransition } from "@/components/layout/PageTransition";
+import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "MetroHCM | Hành Trình Xanh - Tốc Độ Tương Lai",
@@ -56,7 +57,7 @@ export default function RootLayout({
                 <nav className="hidden md:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.2em] text-slate-100 absolute left-1/2 -translate-x-1/2">
                   <a href="/" className="hover:text-primary transition-all hover:tracking-[0.3em]">Trang chủ</a>
                   <a href="/fare" className="hover:text-primary transition-all hover:tracking-[0.3em]">Giá vé</a>
-                  <a href="/" className="hover:text-primary transition-all hover:tracking-[0.3em]">Tin tức</a>
+                  <a href="/news" className="hover:text-primary transition-all hover:tracking-[0.3em]">Tin tức</a>
                 </nav>
 
                 {/* Primary Action */}
@@ -81,12 +82,7 @@ export default function RootLayout({
               </PageTransition>
             </main>
 
-            {/* Footer placeholder */}
-            <footer className="py-12 border-t border-white/5 bg-black/20">
-              <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
-                © 2024 MetroHCM. Phát triển bởi Đội ngũ Senior Architect.
-              </div>
-            </footer>
+            <Footer />
           </div>
         </ReactQueryProvider>
       </body>

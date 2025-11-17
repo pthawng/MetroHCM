@@ -84,41 +84,6 @@ export default function LandingPage() {
              </motion.button>
           </Container>
       </section>
-
-      {/* 5. ELITE FOOTER */}
-      <footer className="py-20 border-t border-white/5 bg-black">
-          <Container>
-             <div className="flex flex-col md:flex-row justify-between items-start gap-12">
-                <div className="space-y-6">
-                   <div className="text-2xl font-black text-white font-outfit tracking-tighter uppercase italic">
-                      Metro<span className="text-secondary not-italic">HCM</span>
-                   </div>
-                   <p className="text-sm text-slate-500 max-w-xs font-medium">
-                     Nền tảng vận hành số hóa cho hệ thống đường sắt đô thị TP. Hồ Chí Minh. 
-                     Dự án do MAUR & đối tác công nghệ triển khai.
-                   </p>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-16">
-                   <FooterColumn 
-                      title="Hệ thống" 
-                      links={["Tuyến số 1", "Tuyến số 2", "Bản đồ mạng lưới", "Trạng thái vận hành"]} 
-                   />
-                   <FooterColumn 
-                      title="Dịch vụ" 
-                      links={["Đặt vé", "Thẻ tháng", "Chính sách vé", "Thanh toán"]} 
-                   />
-                </div>
-             </div>
-             <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">© 2026 MetroHCM Digital Twin Engine. All rights reserved.</p>
-                <div className="flex gap-8 text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                   <a href="#" className="hover:text-white transition-colors">Điều khoản</a>
-                   <a href="#" className="hover:text-white transition-colors">Bảo mật</a>
-                   <a href="#" className="hover:text-white transition-colors">Liên hệ</a>
-                </div>
-             </div>
-          </Container>
-      </footer>
     </main>
   );
 }
@@ -140,20 +105,5 @@ function FeatureCard({ icon, title, description, delay }: { icon: React.ReactNod
          <p className="text-sm text-slate-400 font-medium leading-relaxed">{description}</p>
       </div>
     </motion.div>
-  );
-}
-
-function FooterColumn({ title, links }: { title: string, links: string[] }) {
-  return (
-    <div className="space-y-6">
-       <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{title}</h4>
-       <ul className="space-y-3">
-          {links.map((link, i) => (
-             <li key={i}>
-                <a href="#" className="text-sm font-medium text-slate-500 hover:text-white transition-colors">{link}</a>
-             </li>
-          ))}
-       </ul>
-    </div>
   );
 }
