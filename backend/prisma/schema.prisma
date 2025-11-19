@@ -1,0 +1,305 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Line {
+  id              String   @id @default(uuid()) @db.Uuid
+  code            String   @unique @db.VarChar(10)
+  name            String   @db.VarChar
+  nameEn          String?  @map("name_en") @db.VarChar
+  color           String   @default("#000000") @db.VarChar(7)
+  status          String   @default("active") @db.VarChar(20)
+  totalLengthKm   Float?   @map("total_length_km")
+  openingDate     DateTime? @map("opening_date") @db.Date
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  stations        LineStation[]
+  segments        Segment[]
+  depots          Depot[]
+  trains          Train[]
+  schedules       Schedule[]
+  trips           Trip[]
+  transfersFrom   Transfer[] @relation("LineFromTransfers")
+  transfersTo     Transfer[] @relation("LineToTransfers")
+  routeSegments   RouteSegment[]
+
+  @@map("lines")
+}
+
+model Station {
+  id              String   @id @default(uuid()) @db.Uuid
+  code            String   @unique @db.VarChar(10)
+  name            String   @db.VarChar
+  nameEn          String?  @map("name_en") @db.VarChar
+  lat             Float
+  lng             Float
+  address         String?  @db.VarChar
+  type            String   @default("underground") @db.VarChar(20)
+  hasElevator     Boolean  @default(false) @map("has_elevator")
+  hasParking      Boolean  @default(false) @map("has_parking")
+  status          String   @default("active") @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  lines           LineStation[]
+  segmentsFrom    Segment[] @relation("StationFromSegments")
+  segmentsTo      Segment[] @relation("StationToSegments")
+  fareZones       StationFareZone[]
+  transfersFrom   Transfer[] @relation("StationFromTransfers")
+  transfersTo     Transfer[] @relation("StationToTransfers")
+  routesOrigin    Route[] @relation("OriginRoutes")
+  routesDest      Route[] @relation("DestinationRoutes")
+  stopTimes       StopTime[]
+  boardSegments   RouteSegment[] @relation("BoardSegments")
+  alightSegments  RouteSegment[] @relation("AlightSegments")
+
+  @@map("stations")
+}
+
+model LineStation {
+  id              String   @id @default(uuid()) @db.Uuid
+  lineId          String   @map("line_id") @db.Uuid
+  stationId       String   @map("station_id") @db.Uuid
+  sequenceOrder   Int      @map("sequence_order") @db.SmallInt
+  kmFromStart     Float    @default(0) @map("km_from_start")
+  platformCount   Int      @default(2) @map("platform_count") @db.SmallInt
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  line            Line     @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  station         Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  @@unique([lineId, sequenceOrder])
+  @@unique([lineId, stationId])
+  @@map("line_stations")
+}
+
+model Segment {
+  id              String   @id @default(uuid()) @db.Uuid
+  lineId          String   @map("line_id") @db.Uuid
+  fromStationId   String   @map("from_station_id") @db.Uuid
+  toStationId     String   @map("to_station_id") @db.Uuid
+  distanceKm      Float    @map("distance_km")
+  travelTimeSec   Int      @map("travel_time_sec")
+  maxSpeedKmh     Int?     @map("max_speed_kmh") @db.SmallInt
+  trackType       String   @default("underground") @map("track_type") @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  line            Line     @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  fromStation     Station  @relation("StationFromSegments", fields: [fromStationId], references: [id])
+  toStation       Station  @relation("StationToSegments", fields: [toStationId], references: [id])
+
+  @@unique([lineId, fromStationId, toStationId])
+  @@map("segments")
+}
+
+model Depot {
+  id              String   @id @default(uuid()) @db.Uuid
+  code            String   @unique @db.VarChar(10)
+  name            String   @db.VarChar
+  lat             Float?
+  lng             Float?
+  lineId          String?  @map("line_id") @db.Uuid
+  capacity        Int?     @db.SmallInt
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  line            Line?    @relation(fields: [lineId], references: [id])
+  trains          Train[]
+
+  @@map("depots")
+}
+
+model Train {
+  id              String   @id @default(uuid()) @db.Uuid
+  code            String   @unique @db.VarChar(20)
+  lineId          String   @map("line_id") @db.Uuid
+  depotId         String?  @map("depot_id") @db.Uuid
+  carCount        Int      @default(4) @map("car_count") @db.SmallInt
+  capacityPerCar  Int      @default(200) @map("capacity_per_car") @db.SmallInt
+  manufacturer    String?  @db.VarChar
+  manufactureYear Int?     @map("manufacture_year") @db.SmallInt
+  status          String   @default("active") @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  line            Line     @relation(fields: [lineId], references: [id])
+  depot           Depot?   @relation(fields: [depotId], references: [id])
+  trips           Trip[]
+
+  @@map("trains")
+}
+
+model FareZone {
+  id              String   @id @default(uuid()) @db.Uuid
+  code            String   @unique @db.VarChar(10)
+  name            String   @db.VarChar
+  description     String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  stations        StationFareZone[]
+  fareRulesFrom   FareRule[] @relation("FromZoneRules")
+  fareRulesTo     FareRule[] @relation("ToZoneRules")
+
+  @@map("fare_zones")
+}
+
+model StationFareZone {
+  stationId       String   @map("station_id") @db.Uuid
+  fareZoneId      String   @map("fare_zone_id") @db.Uuid
+
+  station         Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  fareZone        FareZone @relation(fields: [fareZoneId], references: [id], onDelete: Cascade)
+
+  @@id([stationId, fareZoneId])
+  @@map("station_fare_zones")
+}
+
+model FareRule {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String   @db.VarChar
+  fromZoneId      String?  @map("from_zone_id") @db.Uuid
+  toZoneId        String?  @map("to_zone_id") @db.Uuid
+  minStations     Int?     @map("min_stations") @db.SmallInt
+  maxStations     Int?     @map("max_stations") @db.SmallInt
+  basePrice       Decimal  @map("base_price") @db.Decimal(12, 0)
+  currency        String   @default("VND") @db.VarChar(3)
+  validFrom       DateTime? @map("valid_from") @db.Date
+  validTo         DateTime? @map("valid_to") @db.Date
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  fromZone        FareZone? @relation("FromZoneRules", fields: [fromZoneId], references: [id])
+  toZone          FareZone? @relation("ToZoneRules", fields: [toZoneId], references: [id])
+
+  @@map("fare_rules")
+}
+
+model Schedule {
+  id              String   @id @default(uuid()) @db.Uuid
+  lineId          String   @map("line_id") @db.Uuid
+  name            String   @db.VarChar
+  dayType         String   @map("day_type") @db.VarChar(20)
+  direction       Int      @default(0) @db.SmallInt
+  headwayPeakSec  Int      @map("headway_peak_sec") @db.SmallInt
+  headwayOffpeakSec Int    @map("headway_offpeak_sec") @db.SmallInt
+  firstDeparture  DateTime @map("first_departure") @db.Time
+  lastDeparture   DateTime @map("last_departure") @db.Time
+  effectiveFrom   DateTime @map("effective_from") @db.Date
+  effectiveTo     DateTime? @map("effective_to") @db.Date
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  line            Line     @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  trips           Trip[]
+
+  @@map("schedules")
+}
+
+model Trip {
+  id                  String   @id @default(uuid()) @db.Uuid
+  scheduleId          String?  @map("schedule_id") @db.Uuid
+  lineId              String   @map("line_id") @db.Uuid
+  trainId             String?  @map("train_id") @db.Uuid
+  direction           Int      @default(0) @db.SmallInt
+  serviceDate         DateTime @map("service_date") @db.Date
+  plannedDepartureAt  DateTime @map("planned_departure_at") @db.Timestamp
+  actualDepartureAt   DateTime? @map("actual_departure_at") @db.Timestamp
+  status              String   @default("scheduled") @db.VarChar(20)
+  delaySeconds        Int      @default(0) @map("delay_seconds")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+
+  schedule            Schedule? @relation(fields: [scheduleId], references: [id])
+  line                Line      @relation(fields: [lineId], references: [id])
+  train               Train?    @relation(fields: [trainId], references: [id])
+  stopTimes           StopTime[]
+
+  @@index([serviceDate])
+  @@index([lineId, serviceDate])
+  @@map("trips")
+}
+
+model StopTime {
+  id                  String   @id @default(uuid()) @db.Uuid
+  tripId              String   @map("trip_id") @db.Uuid
+  stationId           String   @map("station_id") @db.Uuid
+  sequenceOrder       Int      @map("sequence_order") @db.SmallInt
+  plannedArrivalAt    DateTime? @map("planned_arrival_at") @db.Timestamp
+  plannedDepartureAt  DateTime? @map("planned_departure_at") @db.Timestamp
+  actualArrivalAt     DateTime? @map("actual_arrival_at") @db.Timestamp
+  actualDepartureAt   DateTime? @map("actual_departure_at") @db.Timestamp
+  dwellTimeSec        Int      @default(30) @map("dwell_time_sec") @db.SmallInt
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  trip                Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  station             Station  @relation(fields: [stationId], references: [id])
+
+  @@unique([tripId, sequenceOrder])
+  @@unique([tripId, stationId])
+  @@index([stationId])
+  @@map("stop_times")
+}
+
+model Transfer {
+  id                  String   @id @default(uuid()) @db.Uuid
+  fromStationId       String   @map("from_station_id") @db.Uuid
+  toStationId         String   @map("to_station_id") @db.Uuid
+  fromLineId          String   @map("from_line_id") @db.Uuid
+  toLineId            String   @map("to_line_id") @db.Uuid
+  transferType        String   @default("same_station") @map("transfer_type") @db.VarChar(20)
+  walkingTimeSec      Int      @default(120) @map("walking_time_sec") @db.SmallInt
+  walkingDistanceM    Int?     @map("walking_distance_m") @db.SmallInt
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  fromStation         Station  @relation("StationFromTransfers", fields: [fromStationId], references: [id])
+  toStation           Station  @relation("StationToTransfers", fields: [toStationId], references: [id])
+  fromLine            Line     @relation("LineFromTransfers", fields: [fromLineId], references: [id])
+  toLine              Line     @relation("LineToTransfers", fields: [toLineId], references: [id])
+
+  @@unique([fromStationId, toStationId, fromLineId, toLineId])
+  @@map("transfers")
+}
+
+model Route {
+  id                  String   @id @default(uuid()) @db.Uuid
+  originStationId     String   @map("origin_station_id") @db.Uuid
+  destinationStationId String  @map("destination_station_id") @db.Uuid
+  totalDistanceKm     Float    @map("total_distance_km")
+  totalDurationSec    Int      @map("total_duration_sec")
+  totalFare           Decimal? @map("total_fare") @db.Decimal(12, 0)
+  transferCount       Int      @default(0) @map("transfer_count") @db.SmallInt
+  computedAt          DateTime @default(now()) @map("computed_at")
+
+  originStation       Station  @relation("OriginRoutes", fields: [originStationId], references: [id])
+  destinationStation  Station  @relation("DestinationRoutes", fields: [destinationStationId], references: [id])
+  segments            RouteSegment[]
+
+  @@unique([originStationId, destinationStationId])
+  @@index([originStationId, destinationStationId])
+  @@map("routes")
+}
+
+model RouteSegment {
+  id                  String   @id @default(uuid()) @db.Uuid
+  routeId             String   @map("route_id") @db.Uuid
+  sequenceOrder       Int      @map("sequence_order") @db.SmallInt
+  lineId              String   @map("line_id") @db.Uuid
+  boardStationId      String   @map("board_station_id") @db.Uuid
+  alightStationId     String   @map("alight_station_id") @db.Uuid
+  stationCount        Int      @map("station_count") @db.SmallInt
+  distanceKm          Float    @map("distance_km")
+  durationSec         Int      @map("duration_sec")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  route               Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  line                Line     @relation(fields: [lineId], references: [id])
+  boardStation        Station  @relation("BoardSegments", fields: [boardStationId], references: [id])
+  alightStation       Station  @relation("AlightSegments", fields: [alightStationId], references: [id])
+
+  @@unique([routeId, sequenceOrder])
+  @@map("route_segments")
+}

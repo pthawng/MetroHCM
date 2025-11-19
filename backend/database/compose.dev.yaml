@@ -1,0 +1,30 @@
+name: metro-hcm
+services:
+  metro-db:
+    image: postgres:16-alpine
+    container_name: metro-hcm-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-metro_password}
+      POSTGRES_DB: ${DB_NAME:-metrohcm}
+    ports:
+      - "5234:5432" # Map cố định port 5234 ra ngoài
+    volumes:
+      - metro_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - metro_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d metrohcm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+networks:
+  metro_network:
+    name: metro_hcm_network
+
+volumes:
+  metro_data:
+    name: metro_hcm_data
