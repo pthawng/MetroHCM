@@ -5,6 +5,7 @@ import { LineModule } from './modules/line/line.module';
 import { SegmentModule } from './modules/segment/segment.module';
 import { TransferModule } from './modules/transfer/transfer.module';
 import { RoutingModule } from './modules/routing/routing.module';
+import { TripModule } from './modules/trip/trip.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { RoutingModule } from './modules/routing/routing.module';
     SegmentModule,
     TransferModule,
     RoutingModule,
+    TripModule,
   ],
 })
 export class AppModule {}

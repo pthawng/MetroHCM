@@ -11,18 +11,14 @@ export class AppController {
   ) {}
 
   @Get('trains/positions')
-  getPositions() {
-    const mockTrip: Trip = {
-      id: 'TRIP-01',
-      lineId: 'LINE-1',
-      stopTimes: [
-        { stationId: 'S1', arrivalTime: this.timeService.getNowSeconds() - 100, departureTime: this.timeService.getNowSeconds() + 10 }, 
-        { stationId: 'S2', arrivalTime: this.timeService.getNowSeconds() + 130, departureTime: this.timeService.getNowSeconds() + 160 }, 
-        { stationId: 'S3', arrivalTime: this.timeService.getNowSeconds() + 260, departureTime: this.timeService.getNowSeconds() + 290 },
-      ]
-    };
+  async getPositions() {
+    return this.simulationService.getActiveTrainPositions();
+  }
 
-    return [this.simulationService.getTrainPosition(mockTrip)];
+  @Get('sync/stations')
+  async syncStations() {
+    await this.simulationService.syncStations();
+    return { success: true };
   }
 
   // API ẩn dùng để tua nhanh thời gian test hệ thống (Fast Forward)

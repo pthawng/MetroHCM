@@ -9,7 +9,10 @@ export class StationRepository {
 
   async findById(id: string): Promise<Station | null> {
     const stations = await this.prisma.$queryRaw<any[]>`
-      SELECT *, 
+      SELECT 
+        id, code, name, "name_en", address, type, 
+        "has_elevator", "has_parking", status, 
+        "created_at", "updated_at",
         ST_Y(location::geometry) as lat, 
         ST_X(location::geometry) as lng 
       FROM stations 
@@ -21,7 +24,10 @@ export class StationRepository {
 
   async findAll(): Promise<Station[]> {
     const stations = await this.prisma.$queryRaw<any[]>`
-      SELECT *, 
+      SELECT 
+        id, code, name, "name_en", address, type, 
+        "has_elevator", "has_parking", status, 
+        "created_at", "updated_at",
         ST_Y(location::geometry) as lat, 
         ST_X(location::geometry) as lng 
       FROM stations

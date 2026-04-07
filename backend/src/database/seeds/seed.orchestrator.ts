@@ -39,6 +39,9 @@ export class SeedOrchestrator {
 
         // 2.4 Seed Depot & Trains
         await this.seedTrains(tx, line.id, transitLine);
+
+        // 2.5 Seed Trips & StopTimes
+        await this.seedTrips(tx, line.id, stationMap, transitLine);
       }
 
       // 3. Seed Inter-line Transfers
@@ -245,5 +248,98 @@ export class SeedOrchestrator {
         });
       }
     }));
+  }
+
+  private async seedTrips(tx: any, lineId: string, stationMap: Map<string, string>, transitLine: ITransitLine) {
+    const activeTrains = await tx.train.findMany({
+      where: { lineId, status: 'active' },
+      take: 9,
+    });
+
+    console.log(`🔍 Found ${activeTrains.length} active trains for line ${lineId}`);
+    if (activeTrains.length === 0) {
+      console.warn('⚠️ No active trains found. Skipping trip seeding!');
+      return;
+    }
+
+    // Create a default schedule for today
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const schedule = await tx.schedule.create({
+      data: {
+        lineId,
+        name: `Lịch trình ngày ${todayStr}`,
+        dayType: 'weekday',
+        headwayPeakSec: 300,
+        headwayOffpeakSec: 600,
+        firstDeparture: new Date(`${todayStr}T06:00:00Z`),
+        lastDeparture: new Date(`${todayStr}T23:00:00Z`),
+        effectiveFrom: new Date(`${todayStr}T00:00:00Z`),
+      },
+    });
+    console.log(`📅 Created schedule: ${schedule.id}`);
+
+    const stations = transitLine.stations; // Bến Thành -> Suối Tiên
+    const stationsReverse = [...stations].reverse(); // Suối Tiên -> Bến Thành
+
+    // Split 9 trains: 5 forward, 4 backward
+    for (let i = 0; i < activeTrains.length; i++) {
+      const train = activeTrains[i];
+      const directionValue = i < 5 ? 0 : 1; // 0: Forward, 1: Backward
+      const routeStations = directionValue === 0 ? stations : stationsReverse;
+      
+      for (let runIndex = 0; runIndex < 10; runIndex++) {
+        // Start time: 6:00 AM + staggered offset (15 mins each) + 90 mins per trip cycle
+        const startTime = new Date(`${todayStr}T06:00:00Z`);
+        startTime.setMinutes(startTime.getMinutes() + i * 15 + runIndex * 90);
+
+        const trip = await tx.trip.create({
+          data: {
+            lineId,
+            trainId: train.id,
+            scheduleId: schedule.id,
+            status: 'active',
+            direction: directionValue,
+            serviceDate: new Date(`${todayStr}T00:00:00Z`),
+            plannedDepartureAt: startTime,
+          },
+        });
+
+        let currentTime = new Date(startTime);
+        const stopTimesData = [];
+
+        for (let j = 0; j < routeStations.length; j++) {
+          const sData = routeStations[j];
+          const stationId = stationMap.get(sData.code)!;
+          
+          // Travel time from previous station
+          if (j > 0) {
+            const prevSData = routeStations[j - 1];
+            const dist = Math.abs(sData.km - prevSData.km);
+            const travelSec = Math.round((dist / 35) * 3600); // 35km/h
+            currentTime = new Date(currentTime.getTime() + travelSec * 1000);
+          }
+
+          const arrivalTime = new Date(currentTime);
+          // Dwell time: 30 seconds (except for last station)
+          const dwellSec = j === routeStations.length - 1 ? 0 : 30;
+          const departureTime = new Date(currentTime.getTime() + dwellSec * 1000);
+          
+          stopTimesData.push({
+            tripId: trip.id,
+            stationId,
+            sequenceOrder: j + 1,
+            plannedArrivalAt: arrivalTime,
+            plannedDepartureAt: departureTime,
+          });
+
+          currentTime = departureTime;
+        }
+
+        await tx.stopTime.createMany({ data: stopTimesData });
+      }
+    }
+    
+    console.log(`✅ Seeded ${activeTrains.length * 10} active trips for Line 1 (Bidirectional)`);
   }
 }

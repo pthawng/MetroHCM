@@ -1,19 +1,73 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { TimeService } from './time.service';
 import { Station, StopTime, Trip, TrainState, TrainPosition } from '../models/simulation.types';
+import { BackendClientService } from './backend-client.service';
+import { StateService } from './state.service';
+import { SimulationGateway } from '../gateways/simulation.gateway';
 
 @Injectable()
-export class SimulationService {
+export class SimulationService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(SimulationService.name);
-  
-  // MOCK DATA cho 3 trạm đầu tiên tuyến số 1
-  private readonly stationsMap: Map<string, Station> = new Map([
-    ['S1', { id: 'S1', name: 'Bến Thành', lat: 10.7716, lng: 106.6976 }],
-    ['S2', { id: 'S2', name: 'Nhà hát TP', lat: 10.7766, lng: 106.7032 }],
-    ['S3', { id: 'S3', name: 'Ba Son', lat: 10.7831, lng: 106.7073 }],
-  ]);
+  private stationsMap: Map<string, Station> = new Map();
+  private activeTrips: Trip[] = [];
+  private tickInterval: NodeJS.Timeout;
+  private syncInterval: NodeJS.Timeout;
 
-  constructor(private readonly timeService: TimeService) {}
+  constructor(
+    private readonly timeService: TimeService,
+    private readonly backendClient: BackendClientService,
+    private readonly stateService: StateService,
+    private readonly gateway: SimulationGateway
+  ) {}
+
+  async onModuleInit() {
+    await this.syncStations();
+    await this.syncActiveTrips();
+
+    // The Tick Engine (1000ms)
+    this.tickInterval = setInterval(() => this.tick(), 1000);
+
+    // Sync trips from Backend every 30 seconds
+    this.syncInterval = setInterval(() => this.syncActiveTrips(), 30000);
+  }
+
+  onModuleDestroy() {
+    clearInterval(this.tickInterval);
+    clearInterval(this.syncInterval);
+  }
+
+  async syncStations() {
+    const stations = await this.backendClient.fetchStations();
+    this.stationsMap = new Map(stations.map((s: Station) => [s.id, s]));
+    this.logger.log(`Synced ${this.stationsMap.size} stations from backend.`);
+  }
+
+  async syncActiveTrips() {
+    try {
+      this.activeTrips = await this.backendClient.fetchActiveTrips();
+      this.logger.log(`Synced ${this.activeTrips.length} active trips from backend.`);
+    } catch (e) {
+      this.logger.error('Failed to sync active trips', e);
+    }
+  }
+
+  private tick() {
+    if (this.stationsMap.size === 0 || this.activeTrips.length === 0) return;
+
+    // Calculate all positions
+    const positions = this.activeTrips.map(trip => this.getTrainPosition(trip));
+    
+    // Update State
+    this.stateService.updatePositions(positions);
+
+    // Broadcast
+    this.gateway.broadcastPositions();
+  }
+
+  // Backward compatibility alias for Rest API if needed
+  async getActiveTrainPositions(): Promise<TrainPosition[]> {
+    return this.stateService.getAllPositions();
+  }
 
   private findTrainState(trip: Trip, now: number): TrainState {
     for (let i = 0; i < trip.stopTimes.length; i++) {
