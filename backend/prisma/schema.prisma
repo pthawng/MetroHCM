@@ -86,6 +86,7 @@ model Segment {
   fromStationId String   @map("from_station_id") @db.Uuid
   toStationId   String   @map("to_station_id") @db.Uuid
   distanceKm    Float    @map("distance_km")
+  geometry      Unsupported("geography(LineString, 4326)")?
   travelTimeSec Int      @map("travel_time_sec")
   maxSpeedKmh   Int?     @map("max_speed_kmh") @db.SmallInt
   trackType     String   @default("underground") @map("track_type") @db.VarChar(20)

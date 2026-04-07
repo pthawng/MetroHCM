@@ -1,11 +1,39 @@
-# [ ROOT ] METRO-HCM PROJECT GITIGNORE
-# Standard production-grade ignore patterns
+# ==========================================
+# METRO-HCM PROJECT - GITIGNORE
+# ==========================================
 
-# Dependency Directories
+# --- OS / System Metadata ---
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.AppleDouble
+.LSOverride
+
+# --- IDE / Editor Specific ---
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+.cursor/
+
+# --- Dependency Management ---
 node_modules/
 jspm_packages/
+.pnp/
+.pnp.js
 
-# Environment / Secret Files
+# --- Environment & Secret Management (CRITICAL) ---
 .env
 .env.local
 .env.development.local
@@ -13,55 +41,59 @@ jspm_packages/
 .env.production.local
 *.env
 *.env.*
+!.env.example
+*.key
+*.pem
 
-# OS / System Files
-.DS_Store
-.DS_Store?
-._*
-Thumbe.db
-ehthumbs.db
-desktop.ini
-
-# IDE / Editor Files
-.vscode/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
-.idea/
-*.swp
-*.swo
-.project
-.classpath
-.settings/
-
-# Build and Temp folder
+# --- Build, Cache & Temporary Folders ---
 dist/
 build/
 out/
-tmp/
-temp/
+.next/
 .cache/
 .parcel-cache/
+.turbo/
+.vercel/
+tmp/
+temp/
+*.tsbuildinfo
 
-# Logs
-logs
+# --- DB & Prisma (Metadata & Generated Code) ---
+*.db
+*.sqlite
+*.sqlite-journal
+path/to/generated/client/
+# Note: Keep prisma/schema.prisma, ignore generated heavy metadata if any
+
+# --- Logs & Performance Traces ---
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+access.log
+error.log
 
-# Testing
+# --- Testing & Code Quality ---
 coverage/
 .nyc_output/
+.eslintcache
+.stylelintcache
+*.lcov
+test-results/
 
-# Documentation / Metadata
+# --- Documentation & Specialized Metadata ---
 .gemini/
 .agent/
 .agents/
-.cursor/
+.husky/
+.github/ # Usually kept, but ignore subfolders if needed
+!.github/workflows/
 
-# OS X Folder Attributes
-.AppleDouble
-.LSOverride
+# --- Miscellaneous ---
+*.seed
+*.bak
+*~
+# Ignore diagnostic data
+.pnpm-debug.log*

@@ -7,12 +7,27 @@ export class SegmentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByLineId(lineId: string): Promise<Segment[]> {
-    const segments = await this.prisma.segment.findMany({ where: { lineId } });
+    const segments = await this.prisma.$queryRaw<any[]>`
+      SELECT 
+        id, line_id as "lineId", from_station_id as "fromStationId", to_station_id as "toStationId", 
+        distance_km as "distanceKm", travel_time_sec as "travelTimeSec", max_speed_kmh as "maxSpeedKmh", 
+        track_type as "trackType", created_at as "createdAt",
+        ST_AsGeoJSON(geometry)::json as geometry
+      FROM segments
+      WHERE line_id = ${lineId}::uuid
+    `;
     return segments.map(this.mapToDomain);
   }
 
   async findAll(): Promise<Segment[]> {
-    const segments = await this.prisma.segment.findMany();
+    const segments = await this.prisma.$queryRaw<any[]>`
+      SELECT 
+        id, line_id as "lineId", from_station_id as "fromStationId", to_station_id as "toStationId", 
+        distance_km as "distanceKm", travel_time_sec as "travelTimeSec", max_speed_kmh as "maxSpeedKmh", 
+        track_type as "trackType", created_at as "createdAt",
+        ST_AsGeoJSON(geometry)::json as geometry
+      FROM segments
+    `;
     return segments.map(this.mapToDomain);
   }
 
@@ -27,7 +42,7 @@ export class SegmentRepository {
       maxSpeedKmh: segment.maxSpeedKmh,
       trackType: segment.trackType,
       createdAt: segment.createdAt,
-      updatedAt: segment.createdAt, // Segment doesn't have updatedAt in schema, using createdAt
+      geometry: segment.geometry?.coordinates,
     } as Segment;
   }
 }
