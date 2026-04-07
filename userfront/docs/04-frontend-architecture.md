@@ -1,38 +1,73 @@
-# 04 Frontend Architecture
+# 04 Frontend Architecture (Senior BigTech Spec)
 
-## 🧠 Pattern
+## 🏢 Architectural Blueprint
 
-Chúng ta áp dụng các mẫu thiết kế hiện đại để đảm bảo khả năng mở rộng và bảo trì dễ dàng:
+MetroHCM adopts a **Feature-Driven Modular Architecture** designed for extreme scalability and separation of concerns. This project follows the "Command Center" paradigm, where the UI is treated as a high-fidelity Digital Twin of the physical metro infrastructure.
 
-- **Feature-based Structure**: Chia dự án theo các tính năng (features) thay vì theo loại tệp tin. Mỗi tính năng là một module độc lập chứa đầy đủ logic của nó.
-- **Clean Architecture**: Phân tách logic nghiệp vụ (business logic) khỏi framework và giao diện người dùng, giúp dễ dàng kiểm thử và thay đổi công nghệ nếu cần.
-- **Separation of Concerns (SoC)**: Mọi tệp tin đều chỉ chịu trách nhiệm cho một công việc duy nhất (UI chỉ lo hiển thị, Service chỉ lo dữ liệu, API chỉ lo truyền tải).
+### 📐 Feature-Sliced Core
+The project is decoupled into autonomous features located in `src/features/`. Each feature is a self-contained domain:
+- **Auth**: Identity Gateway & Session Management.
+- **Booking**: GIS Map Engine & Transactional Flow.
+- **Tickets**: Asset Ledger & Digital Vault.
+- **User**: Profile Intelligence & Metro Wallet.
 
-## 📦 Layers (Phân lớp)
+---
 
-Luồng dữ liệu trong ứng dụng tuân thủ mô hình phân lớp một chiều:
+## 📦 System Layers
+
+The data flow follows a strict unidirectional lifecycle to maintain 60fps HUD performance:
 
 ```mermaid
 graph TD
-    UI[UI Components] --> Hooks[Custom Hooks]
-    Hooks --> Services[Business Services]
-    Services --> API[API Clients/Axios]
+    UI[HUD Components / Framer Motion] --> Hooks[Domain Logic Hooks]
+    Hooks --> Store[Zustand State Persistence]
+    Store --> Services[Business Intelligence / Mock Services]
+    Services --> API[Axios / Edge Middleware]
 ```
 
-- **UI**: Thành phần giao diện (React/Vue components) - chịu trách nhiệm hiển thị dữ liệu và nhận sự kiện từ người dùng.
-- **Hooks**: Quản lý trạng thái và kết nối UI với logic - chứa các logic xử lý trạng thái (state management) và side effects.
-- **Services**: Xử lý logic nghiệp vụ - tính toán, chuyển đổi định dạng dữ liệu trước khi trả về hoặc gửi đi.
-- **API**: Lớp giao tiếp với Backend - thực hiện các yêu cầu HTTP (Get, Post, Put, Delete).
+### 1. View Layer (The HUD)
+- **Technology**: React 18 / Next.js 15 (App Router).
+- **Styling**: Vanilla Tailwind CSS + Glassmorphism Primitives.
+- **Animation**: Framer Motion for high-frequency telemetry updates.
 
-## 📁 Folder Detail (Cấu trúc thư mục)
+### 2. State Layer (Atomic Store)
+- **Foundation**: Zustand.
+- **Persistence**: Hybrid approach (Local Storage for Auth/Booking).
+- **Slices**: Decentralized stores per feature (e.g., `useAuthStore`, `useBookingStore`).
 
-Ví dụ chi tiết cho tính năng đặt vé (`ticket`):
+### 3. Logic Layer (Hooks & Services)
+- **Hooks**: Abstract complex UI states (e.g., `useMapTelemetry`).
+- **Services**: Pure business logic (e.g., `fare.service.ts` for distance-based pricing).
+
+---
+
+## 🧭 Directory Taxonomy
+
+Every feature follows a standardized internal hierarchy for predictability:
 
 ```text
-src/features/ticket/
-├── components/     # Các UI Components dành riêng cho tính năng Ticket (Atoms, Molecules, Organisms)
-├── hooks/          # Custom hooks xử lý logic đặt vé, quản lý state cho form
-├── services/       # Logic xử lý dữ liệu: tính giá vé, map lộ trình ga
-├── types/          # Định nghĩa TypeScript interface/types cho Ticket
-└── index.ts        # Entry point để export các thành phần ra ngoài
+src/features/[domain]/
+├── components/     # Atomic HUD elements (Base -> Composite)
+├── hooks/          # Telemetry & UI-State logic
+├── services/       # Domain logic & Mock API integration
+├── constants/      # Static GIS data & Business rules
+└── index.ts        # Public API for other features
 ```
+
+---
+
+## 🛡️ Security & Route Protection
+
+We utilize **Next.js Edge Middleware** for enterprise-grade access control:
+- **Protected Routes**: `/tickets`, `/profile`, `/booking`.
+- **Logic**: JWT/Session verification at the edge to prevent waterfall redirects.
+- **Persistence**: Secure cookie-based session handling via `useAuthStore`.
+
+---
+
+## 🗺️ Digital Twin Logic (GIS HUD)
+
+The `MapPreview` component is the system's core engine, utilizing:
+- **SVG Geodata**: Static coordinates for 14+ stations.
+- **Telemetry Hooks**: `useFleet` calculates real-time train positions using localized mock algorithms.
+- **Interaction**: Path-finding algorithms to calculate route fees (`fare.constants.ts`).

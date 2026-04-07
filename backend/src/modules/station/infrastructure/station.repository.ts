@@ -8,14 +8,25 @@ export class StationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<Station | null> {
-    const station = await this.prisma.station.findUnique({ where: { id } });
-    if (!station) return null;
-    return this.mapToDomain(station);
+    const stations = await this.prisma.$queryRaw<any[]>`
+      SELECT *, 
+        ST_Y(location::geometry) as lat, 
+        ST_X(location::geometry) as lng 
+      FROM stations 
+      WHERE id = ${id}::uuid
+    `;
+    if (!stations || stations.length === 0) return null;
+    return this.mapToDomain(stations[0]);
   }
 
   async findAll(): Promise<Station[]> {
-    const stations = await this.prisma.station.findMany();
-    return stations.map(this.mapToDomain);
+    const stations = await this.prisma.$queryRaw<any[]>`
+      SELECT *, 
+        ST_Y(location::geometry) as lat, 
+        ST_X(location::geometry) as lng 
+      FROM stations
+    `;
+    return stations.map(s => this.mapToDomain(s));
   }
 
   private mapToDomain(station: any): Station {
@@ -23,7 +34,7 @@ export class StationRepository {
       id: station.id,
       code: station.code,
       name: station.name,
-      nameEn: station.nameEn,
+      nameEn: station.nameEn || station.name_en,
       lat: station.lat,
       lng: station.lng,
       address: station.address,
@@ -31,8 +42,8 @@ export class StationRepository {
       hasElevator: station.hasElevator,
       hasParking: station.hasParking,
       status: station.status as StationStatus,
-      createdAt: station.createdAt,
-      updatedAt: station.updatedAt,
+      createdAt: station.createdAt || station.created_at,
+      updatedAt: station.updatedAt || station.updated_at,
     };
   }
 }

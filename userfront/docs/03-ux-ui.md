@@ -1,36 +1,58 @@
-# 03 UX/UI Guideline
+# 03 UX/UI Design System (Senior SPEC)
 
-## 🎯 Design principles
+## 🎯 Design Philosophy: Digital Twin HUD
 
-- **Mobile-first**: Ưu tiên trải nghiệm người dùng trên thiết bị di động, đảm bảo giao diện gọn gàng và tốc độ phản hồi nhanh.
-- **1-handed usage**: Bố trí các nút bấm quan trọng trong tầm với của ngón cái để người dùng dễ dàng thao tác bằng một tay khi đang di chuyển.
-- **≤ 3 steps để mua vé**: Tối ưu hóa quy trình đặt vé sao cho người dùng có thể nhận được vé chỉ trong tối đa 3 bước thao tác chính.
+MetroHCM bypasses traditional SaaS aesthetics for an **Industrial Stealth / Command Center** visual language. Total digital immersion is achieved through high-contrast telemetry and glassmorphism, treating the passenger interface as a living monitoring system for the metro infrastructure.
 
-## 🎨 Color system
+---
 
-Hệ thống màu sắc chủ đạo mang tính tin cậy và thân thiện:
+## 🎨 Atomic Color Architecture
 
-| Loại màu | Mã màu (HEX) | Ý nghĩa |
+| Layer | Hex Code | Semantic Role |
 | :--- | :--- | :--- |
-| **Primary** | `#007AFF` | Màu xanh dương đại diện cho sự tin cậy, an toàn và hiện đại. |
-| **Secondary** | `#22C55E` | Màu xanh lá biểu trưng cho sự thông suốt, lệnh thành công và thân thiện môi trường. |
+| **Void Black** | `#04060B` | Primary background, creating deep contrast for HUD elements. |
+| **Telemetry Blue** | `#007AFF` | Primary status, active route tracking, and core branding. |
+| **Safe Emerald** | `#22C55E` | Validation, active tickets, and operational readiness. |
+| **Alert Amber** | `#F59E0B` | System maintenance, delayed telemetry, or warnings. |
+| **Slate HUD** | `#94A3B8` | Metadata, unit measurements, and inactive states. |
 
-## 🧩 Component system (Atomic Design)
+---
 
-Chúng ta áp dụng triết lý Atomic Design để xây dựng hệ thống UI có khả năng tái sử dụng cao:
+## 🧩 Component System (Command Center Primitives)
 
-### 1. Atoms (Nguyên tử)
-Các thành phần UI nhỏ nhất, không thể chia nhỏ thêm:
-- **Button**: Nút bấm với các trạng thái (primary, secondary, disabled).
-- **Input**: Trường nhập văn bản, chọn ngày tháng.
-- **Icon**: Các biểu tượng hướng dẫn (ga tàu, lịch sử, bản đồ).
+Our Atomic Design is built specifically for high-fidelity data visualization:
 
-### 2. Molecules (Phân tử)
-Nhóm các nguyên tử kết hợp lại để thực hiện một chức năng đơn giản:
-- **StationSelect**: Kết hợp Input và danh sách gợi ý để người dùng chọn mã ga.
-- **PriceDisplay**: Hiển thị số tiền kèm ký hiệu tiền tệ tương ứng.
+### 1. Atoms (Telemetry Base)
+- **Glass Panel**: A `#04060B` surface with `backdrop-blur-3xl` and `border-white/10`.
+- **Digital Stripe**: 1px accent lines used for section separators and header indicators.
+- **HUD Button**: High-transparency interactive zones with `primary` or `white` variants.
 
-### 3. Organisms (Sinh vật)
-Các khối giao diện phức tạp hơn, có thể hoạt động độc lập:
-- **BookingForm**: Bao gồm việc chọn ga đi/đến, chọn số lượng vé và nút xác nhận.
-- **TicketCard**: Hiển thị thông tin vé kèm mã QR và trạng thái vé.
+### 2. Molecules (Data Modules)
+- **StationNode**: Interactive GIS markers with ripple effects on hover.
+- **MagneticStripe**: A visual "Digital Card" pattern used to signify authenticity in tickets.
+- **TelemetryDisplay**: Standardized unit + value pairs (e.g., "28.4°C [Global_Avg]").
+
+### 3. Organisms (Command Surfaces)
+- **MapPreview (GIS HUD)**: The core interactive engine utilizing SVG Geodata and dynamic fleet positioning.
+- **TicketVault**: A grid-based component aggregating digital assets with high-fidelity QR generation.
+- **MetroWallet**: A financial module mirroring premium banking interfaces with balance persistence.
+
+---
+
+## 🎞️ Motion System (HUD Pulse)
+
+Animations are used not just for aesthetics, but to signal **Real-Time Data Continuity**:
+
+- **Telemetry Pulse**: Subtle scaling (1.02x) on interaction zones to indicate "Readiness".
+- **Scan Lines**: Linear animations across the Map Engine to simulate GIS data refreshing.
+- **The Glow**: `drop-shadow` transitions on active routes to simulate electrical infrastructure.
+
+**Standard Easing**: `cubic-bezier(0.4, 0, 0.2, 1)` (Precision / Industrial feel).
+**Duration**: `0.6s` for transitions, `10s+` for background telemetry.
+
+---
+
+## 📐 Layout Engine (Grid-Based)
+
+- **HUD Grid**: 40px base grid with persistent overlays.
+- **Viewport Constraints**: Focused on a **Single Content Surface** (No scrolling where possible, favoring state-toggling within the HUD).

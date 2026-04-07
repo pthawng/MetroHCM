@@ -1,34 +1,59 @@
-# 02 User Flow
+# 02 User Lifecycle & Behavioral Flows (Senior SPEC)
 
-## 🎯 Flow chính (Must-have)
+## 🎯 Primary Transactional Loop (GIS to Asset)
 
-Quy trình trải nghiệm người dùng cơ bản từ khi bắt đầu đến khi có vé:
+The MetroHCM experience is centered around the transition from a **Physical Search** (Map) to a **Digital Asset** (Ticket). 
 
 ```mermaid
-graph LR
-    A[Home] --> B[Select Station]
-    B --> C[Route Preview]
-    C --> D[Ticket Booking]
-    D --> E[Payment]
-    E --> F[QR Ticket]
+graph TD
+    A[Home: GIS HUD] -->|Select Origin/Target| B[Map Preview: Route Calculation]
+    B -->|Confirm Booking| C{Auth Shield}
+    C -->|Guest| D[Login / Register]
+    C -->|Authenticated| E[Payment Gateway]
+    D --> E
+    E -->|Authorize| F[Verified Journey: QR Generation]
+    F -->|Persistence| G[Ticket Vault: Digital Asset]
 ```
 
-## 🔥 Booking Flow chi tiết
+---
 
-Quy trình đặt vé chi tiết từng bước:
+## 🏗️ Detailed Step-by-Step Logic
 
-1. **[Home]**: Giao diện chính hiển thị các tính năng nhanh.
-2. **[Select From/To]**: Người dùng chọn ga khởi hành và ga đến.
-3. **[Show Route + Price]**: Hệ thống hiển thị lộ trình chi tiết và tính toán giá vé tự động.
-4. **[Confirm]**: Người dùng xác nhận thông tin lộ trình và giá vé.
-5. **[Payment]**: Thực hiện giao dịch thanh toán qua cổng điện tử.
-6. **[Success + QR]**: Hiển thị thông báo thành công và cung cấp mã vé QR.
+### 1. GIS Discovery (Home / Map)
+- **User Action**: Interactive selection of nodes on the SVG Map HUD.
+- **System Logic**: Telemetry hooks (`useBooking`) calculate distance and dynamic pricing based on `fare.constants.ts`.
+- **UI State**: The HUD updates in real-time, showing coordinates and route highlights.
 
-## ⚠️ Edge cases (Các trường hợp ngoại lệ)
+### 2. Identity Gateway (Auth)
+- **Barrier**: Protected routes (`/booking`, `/tickets`, `/profile`) trigger the **Edge Middleware**.
+- **Redirection**: Unauthorized users are funneled into the minimalist `AuthLayout`.
+- **Session Persistence**: Successful auth populates the `useAuthStore` and unlocks the **Dashboard**.
 
-Cần xử lý tốt các tình huống sau để đảm bảo trải nghiệm người dùng:
+### 3. Payment & Asset Issuance
+- **Interface**: The `PaymentGateway` module allows selection between **Metro Wallet**, **Card**, or **Banking**.
+- **Wallet Logic**: If using `Metro Wallet`, the system verifies balance against the `UserService`.
+- **Outcome**: A unique `TicketID` is generated, and its state is committed to the **Asset Ledger**.
 
-- **Không có tuyến**: Thông báo lỗi khi không tìm thấy lộ trình giữa hai ga đã chọn.
-- **Thanh toán fail**: Xử lý khi giao dịch bị từ chối hoặc lỗi từ phía ngân hàng/ví điện tử.
-- **Timeout API**: Cơ chế retry hoặc thông báo khi kết nối mạng không ổn định.
-- **User chưa login**: Điều hướng người dùng đến trang đăng nhập/đăng ký khi thực hiện các tác vụ yêu cầu định danh (như thanh toán).
+### 4. Passenger Dashboard (The Vault)
+- **Accessibility**: Users can access their active/expired tickets via the **Ticket Vault** (`/tickets`).
+- **Profile Center**: The **Digital ID** (`/profile`) serves as the core passenger identity, aggregating transit history and wallet status.
+
+---
+
+## ⚠️ High-Fidelity Edge Cases
+
+- **"Empty Vault" State**: Displayed when no transit data exists, with a CTA to return to the GIS Discovery.
+- **Insufficient Wallet Balance**: Triggered during the Payment step, prompting an immediate "Wallet Refill" flow.
+- **Session Expiry**: Handled by the Middleware, ensuring the user is returned to the "Secure Gateway" if the token is void.
+- **Map Desync**: Standardized error HUD if the SVG node IDs don't match the internal coordinate constants.
+
+---
+
+## 🔐 Route Access Control (RBAC)
+
+| Route | Minimum Logic | UI Feedback |
+| :--- | :--- | :--- |
+| `/` | Public | Full GIS HUD |
+| `/tickets` | Authenticated | Private Asset Grid |
+| `/profile` | Authenticated | Personal Identity HUD |
+| `/booking/*` | Authenticated | Transactional Portal |
