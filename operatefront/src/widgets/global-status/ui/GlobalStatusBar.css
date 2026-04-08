@@ -1,0 +1,129 @@
+.global-status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 1000;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.system-logo {
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  font-size: 14px;
+  color: hsl(var(--color-accent));
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: hsla(var(--color-text-primary) / 0.1);
+}
+
+.status-center {
+  display: flex;
+  gap: 32px;
+}
+
+.metric-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.metric-group .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: hsl(var(--color-text-dim));
+  letter-spacing: 0.05em;
+}
+
+.metric-group .value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.network-metrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.network-metrics .label {
+  font-size: 8px;
+  text-transform: uppercase;
+  color: hsl(var(--color-text-dim));
+  letter-spacing: 0.1em;
+}
+
+.network-metrics .value {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: hsl(var(--color-status-success));
+}
+
+.operator-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.operator-display .op-id {
+  font-size: 8px;
+  color: hsl(var(--color-text-dim));
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.operator-display .op-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.clock {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.clock .timezone {
+  font-size: 10px;
+  color: hsl(var(--color-text-dim));
+}
+
+/* Status-specific Bar indicators */
+.status-critical {
+  border-bottom: 1px solid hsla(var(--color-status-error) / 0.4);
+  box-shadow: 0 4px 20px hsla(var(--color-status-error) / 0.1);
+}
+
+.status-degraded {
+  border-bottom: 1px solid hsla(var(--color-status-warning) / 0.4);
+}
+
+.text-warning { color: hsl(var(--color-status-warning)); }
+.text-error { color: hsl(var(--color-status-error)); }
