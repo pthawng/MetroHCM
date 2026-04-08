@@ -5,7 +5,8 @@ export interface Position {
   lng: number;
   lat: number;
   heading: number;
-  id: string; // Train ID
+  id: string; // Trip ID
+  trainId: string; // Physical Asset ID
   lineId: string;
 }
 
@@ -79,6 +80,7 @@ export function updateInterpolationTarget(payload: TrainPayload, latencyMs: numb
 
   const newTarget: Position = {
     id: payload.id,
+    trainId: payload.trainId,
     lineId: payload.lineId,
     lng: payload.location.lng,
     lat: payload.location.lat,
@@ -131,6 +133,7 @@ function getTrainInterpolatedPosition(id: string, now: number): Position | null 
 
   return {
     id: physics.targetPos.id,
+    trainId: physics.targetPos.trainId,
     lineId: physics.targetPos.lineId,
     lng: physics.startPos.lng + (physics.targetPos.lng - physics.startPos.lng) * progress,
     lat: physics.startPos.lat + (physics.targetPos.lat - physics.startPos.lat) * progress,

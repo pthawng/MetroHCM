@@ -44,11 +44,38 @@ export class SimulationService implements OnModuleInit, OnModuleDestroy {
 
   async syncActiveTrips() {
     try {
-      this.activeTrips = await this.backendClient.fetchActiveTrips();
-      this.logger.log(`Synced ${this.activeTrips.length} active trips from backend.`);
+      const trips = await this.backendClient.fetchActiveTrips();
+      this.activeTrips = this.normalizeTripsToToday(trips);
+      this.logger.log(`Synced ${this.activeTrips.length} active trips (normalized to today).`);
     } catch (e) {
       this.logger.error('Failed to sync active trips', e);
     }
+  }
+
+  private normalizeTripsToToday(trips: Trip[]): Trip[] {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+
+    return trips.map(trip => {
+      // Find the first stop to calculate the relative start time
+      if (!trip.stopTimes || trip.stopTimes.length === 0) return trip;
+      
+      const tripStart = trip.stopTimes[0].arrivalTime;
+      const tripDate = new Date(tripStart * 1000);
+      const tripStartOfDay = new Date(tripDate.getFullYear(), tripDate.getMonth(), tripDate.getDate()).getTime() / 1000;
+      
+      // Calculate how many seconds to shift this trip to happen today
+      const offset = todayStart - tripStartOfDay;
+
+      return {
+        ...trip,
+        stopTimes: trip.stopTimes.map(st => ({
+          ...st,
+          arrivalTime: st.arrivalTime + offset,
+          departureTime: st.departureTime + offset,
+        }))
+      };
+    });
   }
 
   private tick() {
@@ -101,13 +128,14 @@ export class SimulationService implements OnModuleInit, OnModuleDestroy {
     const state = this.findTrainState(trip, now);
 
     if (state.status === 'OFFLINE') {
-      return { tripId: trip.id, lineId: trip.lineId, status: 'OFFLINE', position: null };
+      return { tripId: trip.id, trainId: trip.trainId, lineId: trip.lineId, status: 'OFFLINE', position: null };
     }
 
     if (state.status === 'STOPPED' && state.stationId) {
       const station = this.stationsMap.get(state.stationId);
       return { 
           tripId: trip.id, 
+          trainId: trip.trainId,
           lineId: trip.lineId, 
           status: 'STOPPED', 
           position: { lat: station!.lat, lng: station!.lng }
@@ -125,6 +153,7 @@ export class SimulationService implements OnModuleInit, OnModuleDestroy {
 
       return {
         tripId: trip.id,
+        trainId: trip.trainId,
         lineId: trip.lineId,
         status: 'MOVING',
         nextStationId: state.to.stationId,
@@ -133,6 +162,6 @@ export class SimulationService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    return { tripId: trip.id, lineId: trip.lineId, status: 'OFFLINE', position: null };
+    return { tripId: trip.id, trainId: trip.trainId, lineId: trip.lineId, status: 'OFFLINE', position: null };
   }
 }

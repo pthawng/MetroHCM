@@ -172,7 +172,7 @@ export const MapWidget: React.FC = () => {
                   'icon-rotate': ['get', 'heading'],
                   'icon-rotation-alignment': 'map',
                   'icon-allow-overlap': true,
-                  'text-field': ['get', 'id'], 
+                  'text-field': ['get', 'code'], 
                   'text-size': 9,
                   'text-offset': [0, 2.8],
                   'text-anchor': 'top',

@@ -34,55 +34,53 @@ export const GlobalStatusBar: React.FC = () => {
     });
   }, [trains, alerts]);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'CRITICAL': return <Badge variant="error" dot>Critical Failure</Badge>;
-      case 'DEGRADED': return <Badge variant="warning" dot>Degraded Ops</Badge>;
-      default: return <Badge variant="success" dot>Normal Ops</Badge>;
-    }
-  };
-
   return (
-    <div className={`global-status-bar glass status-${health.status.toLowerCase()}`}>
-      <div className="status-left">
-        <div className="system-logo">METRO-OPS</div>
-        <div className="divider" />
-        {getStatusBadge(health.status)}
+    <div className={`sitrep-bar glass ${health.status.toLowerCase()}`}>
+      {/* Top Edge Health Indicator */}
+      <div className={`health-line ${health.status.toLowerCase()}`} />
+
+      <div className="sitrep-left">
+        <span className="system-monogram">MTS</span>
+        <div className="sitrep-divider" />
+        <Badge variant={health.status === 'NORMAL' ? 'success' : health.status === 'DEGRADED' ? 'warning' : 'error'} dot>
+          {health.status}
+        </Badge>
       </div>
 
-      <div className="status-center">
-        <div className="metric-group">
-          <span className="label">Active Units</span>
+      <div className="sitrep-center">
+        <div className="sitrep-metric">
+          <span className="label">ACTIVE</span>
           <span className="value">{health.totalActive}</span>
         </div>
-        <div className="metric-group">
-          <span className="label">Delayed</span>
-          <span className={`value ${health.delayedCount > 0 ? 'text-warning' : ''}`}>
-            {health.delayedCount}
-          </span>
+        <div className="sitrep-divider" />
+        <div className="sitrep-metric">
+          <span className="label">DELAYED</span>
+          <span className={`value ${health.delayedCount > 0 ? 'text-warning' : ''}`}>{health.delayedCount}</span>
         </div>
-        <div className="metric-group">
-          <span className="label">Incidents</span>
+        <div className="sitrep-divider" />
+        <div className="sitrep-metric">
+          <span className="label">INCIDENTS</span>
           <span className={`value ${health.criticalIncidentCount > 0 ? 'text-error' : ''}`}>
             {health.criticalIncidentCount + health.warningIncidentCount}
           </span>
         </div>
       </div>
 
-      <div className="status-right">
-        <div className="network-metrics">
-          <span className="label">Jitter Buffer</span>
+      <div className="sitrep-right">
+        <div className="sitrep-network">
+          <span className="label">JITTER</span>
           <span className="value">{Math.round(latency.currentDelay)}ms</span>
         </div>
-        <div className="divider" />
-        <div className="operator-display">
+        
+        <div className="sitrep-divider" />
+
+        <div className="sitrep-operator" title={activeOperator?.role}>
           <span className="op-id">{activeOperator?.id}</span>
-          <span className="op-name">{activeOperator?.name}</span>
+          <span className="op-name">{activeOperator?.name.split(' ')[0]}</span>
         </div>
-        <div className="divider" />
-        <div className="clock">
-          {time.toLocaleTimeString('en-GB', { hour12: false })}
-          <span className="timezone">UTC+7</span>
+
+        <div className="sitrep-clock">
+          <span className="time">{time.toLocaleTimeString('en-GB', { hour12: false })}</span>
         </div>
       </div>
     </div>

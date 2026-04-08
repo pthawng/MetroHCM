@@ -13,6 +13,7 @@ export interface StopTime {
 
 export interface Trip {
   id: string;
+  trainId: string;
   lineId: string;
   stopTimes: StopTime[];
 }
@@ -28,6 +29,7 @@ export interface TrainState {
 
 export interface TrainPosition {
   tripId: string;
+  trainId: string;
   lineId: string;
   status: TrainStatus;
   position: {

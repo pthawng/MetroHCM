@@ -2,6 +2,7 @@ import { useTrainStore } from '../../../entities/train/store/trainStore';
 import { useFilterStore } from '../../../features/alert-system/store/filterStore';
 import { Panel } from '../../../shared/ui/Panel/Panel';
 import { Badge } from '../../../shared/ui/Badge/Badge';
+import { useInfraStore } from '../../../entities/infra/store/infraStore';
 import './TrainListPanel.css';
 
 export const TrainListPanel: React.FC = () => {
@@ -24,11 +25,13 @@ export const TrainListPanel: React.FC = () => {
     return a.id.localeCompare(b.id);
   });
 
+  const infraTrains = useInfraStore(state => state.trains);
+
   return (
     <Panel title={`Fleet Overview (${trainList.length})`} className="fleet-panel">
       <div className="fleet-list">
         {sortedTrains.map(train => (
-          <TrainCard key={train.id} train={train} />
+          <TrainCard key={train.id} train={train} metadata={infraTrains[train.trainId]} />
         ))}
         {trainList.length === 0 && (
           <div className="fleet-empty">Scanning for active units...</div>
@@ -38,7 +41,7 @@ export const TrainListPanel: React.FC = () => {
   );
 };
 
-const TrainCard: React.FC<{ train: any }> = ({ train }) => {
+const TrainCard: React.FC<{ train: any, metadata?: any }> = ({ train, metadata }) => {
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'delayed': return 'warning';
@@ -52,7 +55,7 @@ const TrainCard: React.FC<{ train: any }> = ({ train }) => {
     <div className={`fleet-card status-${train.status}`}>
       <div className="fleet-card-top">
         <div className="fleet-id-group">
-          <span className="fleet-id">{train.id.substring(0, 8)}</span>
+          <span className="fleet-id">{metadata?.code || train.id.substring(0, 4)}</span>
           <span className="fleet-direction">{train.direction || '→'}</span>
         </div>
         <Badge variant={getStatusVariant(train.status)} dot>

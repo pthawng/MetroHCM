@@ -15,6 +15,7 @@ export const TrainStatusSchema = z.union([
 export const TrainPayloadSchema = z.object({
   version: z.literal('v1'),
   id: z.string(),
+  trainId: z.string(),
   lineId: z.string(),
   status: TrainStatusSchema,
   location: TrainLocationSchema,
@@ -32,3 +33,5 @@ export type TrainStatus = z.infer<typeof TrainStatusSchema>;
 export interface TrainEntity extends TrainPayload {
   lastUpdatedClient: number; // For keeping track of stale data locally
 }
+
+export type Train = TrainEntity;

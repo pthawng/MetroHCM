@@ -11,27 +11,30 @@ export const Dashboard = () => {
   return (
     <SocketProvider>
       <LoginOverlay />
-      <div style={{ 
+      
+      <main className="mission-control-root" style={{ 
         width: '100vw', 
         height: '100vh', 
         overflow: 'hidden', 
-        background: 'hsl(var(--color-bg-primary))',
-        position: 'relative' 
+        position: 'relative',
+        background: '#000' /* True deep background for map transparency */
       }}>
-        {/* Top layer (z-index 1000) */}
+        {/* Layer 0: Map Base */}
+        <MapWidget />
+
+        {/* Layer 1: Global SitRep (Top) */}
         <GlobalStatusBar />
 
-        {/* Base layer (z-index 0) */}
-        <MapWidget />
-        
-        {/* Floating Overlays (z-index 100-900) */}
-        <AlertPanel />
-        <TrainListPanel />
-        <MetricsPanel />
+        {/* Layer 2: Mission Overlays (HUD) */}
+        <div className="hud-layer">
+          <AlertPanel />
+          <TrainListPanel />
+          <MetricsPanel />
+        </div>
 
-        {/* Dev Tools */}
+        {/* Layer 3: Engineering / Dev Tools */}
         <StressTest />
-      </div>
+      </main>
     </SocketProvider>
   );
 };

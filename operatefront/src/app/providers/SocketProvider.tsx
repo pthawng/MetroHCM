@@ -32,6 +32,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       console.warn('❌ Disconnected from Command Center Socket');
     });
 
+    socket.on('connect_error', (error) => {
+      console.error('⚠️ Socket Connection Error:', error.message);
+    });
+
+    socket.on('reconnect_attempt', (attempt) => {
+      console.log(`📡 Socket Reconnecting... (Attempt ${attempt})`);
+    });
+
     // 3. High-frequency Ingestion Stream (Elite Standard)
     socket.on('snapshot', (payload) => {
       processSnapshot(payload);

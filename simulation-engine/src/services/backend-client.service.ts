@@ -1,14 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { Station, Trip } from '../models/simulation.types';
 
 @Injectable()
 export class BackendClientService {
   private readonly logger = new Logger(BackendClientService.name);
-  private readonly backendUrl = 'http://localhost:3000';
+  private readonly backendUrl: string;
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.backendUrl = this.configService.get<string>('BACKEND_URL') || 'http://localhost:3000';
+  }
 
   async fetchStations(): Promise<Station[]> {
     try {
@@ -30,6 +36,7 @@ export class BackendClientService {
       // Map backend StopTime to Simulation StopTime (PlannedArrival -> arrivalTime)
       return response.data.map((trip: any) => ({
         id: trip.id,
+        trainId: trip.trainId,
         lineId: trip.lineId,
         stopTimes: trip.stopTimes.map((st: any) => ({
           stationId: st.stationId,

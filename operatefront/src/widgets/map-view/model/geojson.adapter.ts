@@ -33,7 +33,7 @@ export function updateGeoJSON(
   // 2. In-place update
   trainIds.forEach((id, index) => {
     const pos = trains[id];
-    const meta = trainsMeta[id];
+    const meta = trainsMeta[pos.trainId];
     const feature = existing.features[index] as Feature<Point>;
     
     // Mutate geometry
@@ -42,7 +42,8 @@ export function updateGeoJSON(
     
     // Mutate properties (don't recreate the object if possible)
     const props = feature.properties!;
-    props.id = pos.id;
+    props.id = pos.trainId; // Use Train ID as the identifying prop
+    props.code = meta?.code || pos.id.substring(0, 4);
     props.lineId = pos.lineId;
     props.heading = pos.heading;
     props.carCount = meta?.carCount || 3;

@@ -16,6 +16,7 @@ const MIN_ALERT_INTERVAL = 5000; // 5s
 
 const RawSocketTrainSchema = z.object({
   tripId: z.string(),
+  trainId: z.string(),
   lineId: z.string(),
   status: z.enum(['MOVING', 'STOPPED', 'OFFLINE']),
   position: z.object({ lat: z.number(), lng: z.number() }).nullable(),
@@ -72,8 +73,9 @@ function processRawList(rawList: any[], latency: number) {
   const payloads: TrainPayload[] = rawList
     .filter(p => p.position !== null)
     .map(p => ({
-      version: 'v1',
+      version: 'v1' as const,
       id: p.tripId,
+      trainId: p.trainId,
       lineId: p.lineId,
       status: (p.delaySeconds || 0) > 60 ? 'delayed' : (p.status === 'MOVING' ? 'active' : p.status === 'STOPPED' ? 'stopped' : 'maintenance'),
       location: p.position!,

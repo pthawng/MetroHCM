@@ -73,7 +73,10 @@ export class SimulationGateway implements OnGatewayConnection, OnGatewayDisconne
       trains: allPositions
     };
 
-    // Broadcast bundle to all clients
+    // Broadcast bundle to all clients (Elite Standard)
     this.server.emit('train_telemetry', bundle);
+
+    // Legacy/Debug standard for simple tools
+    this.server.emit('train_positions', allPositions);
   }
 }

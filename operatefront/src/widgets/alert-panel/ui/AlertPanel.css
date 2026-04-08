@@ -1,28 +1,47 @@
 .alert-panel-container {
   position: absolute;
-  top: 68px; /* Below status bar (48) + 20 margin */
-  right: 20px;
-  width: 320px;
-  max-height: calc(100vh - 100px);
+  top: 56px; /* Offset from sitrep bar */
+  right: 24px;
+  width: 340px;
+  max-height: 400px;
   z-index: 900;
-}
-
-.alert-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .alert-card {
-  padding: 12px;
-  border-radius: 8px;
-  background: hsla(var(--color-bg-surface) / 0.5);
-  border: 1px solid hsla(var(--color-text-primary) / 0.05);
+  padding: 14px;
+  border-radius: 12px;
+  background: hsla(var(--color-bg-surface) / var(--opacity-hud));
+  backdrop-filter: blur(var(--blur-md));
+  border: 1px solid hsla(var(--color-text-primary) / 0.08);
   transition: var(--transition-base);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.alert-card:hover {
+  background: hsla(var(--color-bg-surface) / 0.9);
+  border-color: hsla(var(--color-text-primary) / 0.15);
+  transform: translateY(-2px);
 }
 
 .alert-card.acknowledged {
-  opacity: 0.6;
+  opacity: var(--opacity-idle);
+  filter: grayscale(0.5);
+}
+
+.alert-card.acknowledged:hover {
+  opacity: 0.8;
+  filter: none;
 }
 
 .alert-card-header {
@@ -40,62 +59,49 @@
 
 .alert-message {
   font-size: 13px;
-  line-height: 1.4;
-  margin-bottom: 8px;
-  font-weight: 500;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #fff;
 }
 
 .severity-critical {
-  border-left: 3px solid hsl(var(--color-status-error));
-  background: hsla(var(--color-status-error) / 0.05);
+  border-left: 4px solid hsl(var(--color-status-error));
+  box-shadow: 0 0 15px hsla(var(--color-status-error) / 0.1);
 }
 
 .severity-warning {
-  border-left: 3px solid hsl(var(--color-status-warning));
-  background: hsla(var(--color-status-warning) / 0.05);
+  border-left: 4px solid hsl(var(--color-status-warning));
 }
 
 .alert-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .alert-count {
-  font-size: 10px;
+  font-size: 9px;
   background: hsla(var(--color-text-primary) / 0.1);
   padding: 2px 6px;
-  border-radius: 100px;
+  border-radius: 4px;
   color: hsl(var(--color-text-dim));
 }
 
 .alert-attribution {
   font-size: 10px;
   color: hsl(var(--color-status-success));
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.alert-attribution strong {
-  margin-left: 4px;
-  color: #fff;
 }
 
 .alert-actions {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .empty-alerts {
   text-align: center;
-  padding: 24px;
+  padding: 32px;
   color: hsl(var(--color-text-dim));
   font-style: italic;
-  font-size: var(--font-size-sm);
-}
-
-.clear-btn {
-  margin-top: 16px;
-  width: 100%;
 }
